@@ -23,7 +23,7 @@ And this example is based on `scikit_bring_your_own example` in `https://github.
 
 - `local_test/test_dir/output/success` is not created automatically while testing.
 - I couldn't find how to test `trainingParams` so I couldn't test feature to specify label/feature column names.
-
+- I updated `build_and_push.sh` because original command uses `--no-include-email` with bad way...
 
 # Original ReadMe.md
 >
