@@ -59,27 +59,33 @@ def ping():
 
 @app.route('/invocations', methods=['POST'])
 def transformation():
-    """Do an inference on a single batch of data. In this sample server, we take data as CSV, convert
-    it to a pandas data frame for internal use and then convert the predictions back to CSV (which really
-    just means one prediction per line, since there's a single column.
-    """
-    data = None
+    try:
+        """Do an inference on a single batch of data. In this sample server, we take data as CSV, convert
+        it to a pandas data frame for internal use and then convert the predictions back to CSV (which really
+        just means one prediction per line, since there's a single column.
+        """
+        data = None
 
-    # Convert from CSV to pandas
-    if flask.request.content_type == 'binary/octet-stream':
-        data = flask.request.data
-        data = pd.read_pickle(data)
-    else:
-        return flask.Response(response='This predictor only supports CSV data', status=415, mimetype='text/plain')
+        # Convert from pickle to pandas
+        print('Data checking...')
+        if flask.request.content_type == 'binary/octet-stream':
+            data = flask.request.data
+            data = pd.read_pickle(StringIO.StringIO(data))
+        else:
+            return flask.Response(response='This predictor only supports pickled pandas.DataFrame',
+                                  status=415, mimetype='text/plain')
 
-    print('Invoked with {} records'.format(len(data)))
+        print('Invoked with {} records'.format(len(data)))
 
-    # Do the prediction
-    predictions = ScoringService.predict(data)
+        # Do the prediction
+        predictions = ScoringService.predict(data)
 
-    # Convert from numpy back to CSV
-    out = StringIO.StringIO()
-    pd.DataFrame({'results':predictions}).to_pickle(out)
-    result = out.getvalue()
+        # Convert from numpy back to CSV
+        out = StringIO.StringIO()
+        pd.DataFrame({'results':predictions}).to_pickle(out)
+        result = out.getvalue()
 
-    return flask.Response(response=result, status=200, mimetype='binary/octet-stream')
+        return flask.Response(response=result, status=200, mimetype='binary/octet-stream')
+    except Exception as e:
+        return flask.Response(response='sorry, error: {e}'.format(e=str(e)),
+                                  status=415, mimetype='text/plain')

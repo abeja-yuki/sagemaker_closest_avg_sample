@@ -36,4 +36,3 @@ ENV PATH="/opt/program:${PATH}"
 # Set up the program in the image
 COPY closest_avg /opt/program
 WORKDIR /opt/program
-
